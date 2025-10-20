@@ -1,3 +1,3 @@
 ## Team Contributions
-- Setup for Manasa completed on September 22, 2025. Ready for the challenge!
+- Setup for Manasa completed on october 20, 2025. Ready for the challenge!
 
