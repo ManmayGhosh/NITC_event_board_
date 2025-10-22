@@ -1,3 +1,5 @@
 ## Team Contributions
-- Setup for Manasa completed on october 20, 2025. Ready for the challenge!
+This is the template created for MERN project for SSL Lab in Moonsoon 2025 for MTech First year student.
+Setup Initiation completed from Manmay
 
+Testing Testing
