@@ -3,3 +3,4 @@ This is the template created for MERN project for SSL Lab in Moonsoon 2025 for M
 Setup Initiation completed from Manmay
 
 Testing Testing
+- Setup for Manasa completed on October 22, 2025. Ready for the challenge!
