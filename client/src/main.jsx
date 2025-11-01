@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SignIn from "./components/auth/SignIn.jsx";
 import GuestView from './components/auth/GuestView.jsx';
 import EventBoard from "./components/EventBoard.jsx";
+import EventForm from "./components/EventForm.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import './index.css'
 import App from './App.jsx'
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/" element={<App />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/events" element={<EventBoard />} />
+        <Route path="/submit-event" element={<EventForm />} />
       </Routes>
     </BrowserRouter>
   </GoogleOAuthProvider>,
