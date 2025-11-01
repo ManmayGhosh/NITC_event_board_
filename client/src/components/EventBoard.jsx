@@ -27,7 +27,7 @@ export default function EventBoard() {
 
   if (loading) {
     return (
-      <div className="p-6 min-h-screen bg-gradient-to-br from-violet-50 via-pink-50 to-rose-100">
+      <div className="p-6 min-h-screen bg-linear-to-br from-violet-50 via-pink-50 to-rose-100">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-pink-200 w-1/3 rounded" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -53,7 +53,7 @@ export default function EventBoard() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-pink-100 to-rose-200 text-gray-800 p-6">
+    <div className="min-h-screen bg-linear-to-br from-violet-50 via-pink-100 to-rose-200 text-gray-800 p-6">
       <header className="flex justify-between items-center mb-8 bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-md border-b border-pink-200">
         <h1 className="text-3xl font-bold text-pink-700 drop-shadow-sm">
           Upcoming Events

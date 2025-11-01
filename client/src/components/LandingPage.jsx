@@ -12,7 +12,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-100 to-rose-100 text-gray-800 transition-all duration-300">
+    <div className="min-h-screen bg-linear-to-br from-amber-50 via-orange-100 to-rose-100 text-gray-800 transition-all duration-300">
       <header className="flex justify-between items-center p-5 bg-white/80 backdrop-blur-sm shadow-md border-b border-orange-200">
         <h1 className="text-3xl font-bold text-orange-700 drop-shadow-sm">
           NITC Event Board
@@ -20,13 +20,13 @@ export default function LandingPage() {
         <div className="space-x-3">
           <button
             className="px-4 py-2 rounded-lg border border-orange-400 text-orange-700 font-medium hover:bg-orange-50 transition"
-            onClick={() => {}}
+            onClick={() => setShowModal("signin")}
           >
             Sign In
           </button>
           <button
             className="px-4 py-2 rounded-lg bg-orange-600 text-white font-medium hover:bg-orange-700 shadow-md transition"
-            onClick={() => setShowModal(true)}
+            onClick={() => setShowModal("guest")}
           >
             Guest View
           </button>
@@ -37,7 +37,7 @@ export default function LandingPage() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl shadow-lg hover:shadow-xl transition overflow-hidden"
+            className="bg-linear-to-br from-orange-100 to-orange-200 rounded-2xl shadow-lg hover:shadow-xl transition overflow-hidden"
           >
             <div className="h-40 bg-orange-300" />
             <div className="p-4 space-y-3">
@@ -51,6 +51,7 @@ export default function LandingPage() {
 
       {showModal && (
         <SignInModal
+          mode={showModal}  // 🔹 tells modal if it’s "signin" or "guest"
           onClose={() => setShowModal(false)}
           onAuthenticated={handleAuthenticated}
         />
