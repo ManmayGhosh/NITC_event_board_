@@ -32,7 +32,7 @@ export default function AdminEventReview() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-100 p-6">
+    <div className="min-h-screen bg-linear-to-br from-gray-100 to-blue-100 p-6">
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
         Admin Event Review Panel
       </h1>

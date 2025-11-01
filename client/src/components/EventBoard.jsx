@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import ModalView from "./common/ModalView";
 
 export default function EventBoard() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("name_asc");
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -84,7 +86,8 @@ export default function EventBoard() {
         {filtered.map((event) => (
           <article
             key={event._id || event.name}
-            className="bg-white/80 backdrop-blur-sm border border-pink-200 shadow-lg rounded-2xl p-6 hover:shadow-xl transition"
+            className="bg-white/80 backdrop-blur-sm border border-pink-200 shadow-lg rounded-2xl p-6 hover:shadow-xl transition cursor-pointer"
+            onClick={() => setSelectedEvent(event)}
           >
             <img
               src={event.banner || `https://picsum.photos/seed/${event._id}/800/400`}
@@ -99,6 +102,40 @@ export default function EventBoard() {
           </article>
         ))}
       </div>
+
+      {/* Popup Modal */}
+      <ModalView
+        show={!!selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        title={selectedEvent?.name}
+      >
+        {selectedEvent && (
+          <div className="space-y-2">
+            <img
+              src={selectedEvent.banner || `https://picsum.photos/seed/${selectedEvent._id}/800/400`}
+              alt={selectedEvent.name}
+              className="rounded w-full h-48 object-cover mb-4"
+            />
+            <p><strong>Date:</strong> {selectedEvent.date}</p>
+            <p><strong>Time:</strong> {selectedEvent.time}</p>
+            <p><strong>Venue:</strong> {selectedEvent.venue}</p>
+            <p><strong>Association:</strong> {selectedEvent.associationName}</p>
+            <p><strong>Head:</strong> {selectedEvent.associationHead}</p>
+            <p><strong>Description:</strong> {selectedEvent.description || "No details provided."}</p>
+            <p>
+                <strong>Registration Link:</strong>{" "}
+                <a
+                  href={selectedEvent.registrationLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  {selectedEvent.registrationLink}
+                </a>
+            </p>
+          </div>
+        )}
+      </ModalView>
     </div>
   );
 }
