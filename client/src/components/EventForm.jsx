@@ -3,6 +3,7 @@ import React, { useState } from "react";
 const EventForm = () => {
   const [formData, setFormData] = useState({
     eventName: "",
+    associationName: "",
     associationHead: "",
     email: "",
     date: "",
@@ -35,11 +36,11 @@ const EventForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const { eventName, associationHead, email, date, time, venue } = formData;
+    const { eventName, associationName, associationHead, email, date, time, venue } = formData;
 
     // ✅ Mandatory fields validation
-    if (!eventName || !associationHead || !email || !date || !time || !venue) {
-      alert("⚠️ Please fill all mandatory fields (Event Name, Association Head, Email, Date, Time, Venue).");
+    if (!eventName || !associationName || !associationHead || !email || !date || !time || !venue) {
+      alert("⚠️ Please fill all mandatory fields (Event Name, Association Name, Association Head, Email, Date, Time, Venue).");
       return;
     }
 
@@ -80,6 +81,25 @@ const EventForm = () => {
           />
           <p className="text-sm text-gray-500 text-right">
             {formData.eventName.length}/50
+          </p>
+        </div>
+
+        {/* Association Name */}
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-1">
+            Association Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="associationName"
+            value={formData.associationName}
+            onChange={handleChange}
+            maxLength="50"
+            required
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+          />
+          <p className="text-sm text-gray-500 text-right">
+            {formData.associationName.length}/50
           </p>
         </div>
 
@@ -170,7 +190,9 @@ const EventForm = () => {
 
         {/* Description */}
         <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-1">Description</label>
+          <label className="block text-gray-700 font-medium mb-1">
+            Description
+          </label>
           <textarea
             name="description"
             value={formData.description}

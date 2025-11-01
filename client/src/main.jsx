@@ -5,6 +5,8 @@ import SignIn from "./components/auth/SignIn.jsx";
 import GuestView from './components/auth/GuestView.jsx';
 import EventBoard from "./components/EventBoard.jsx";
 import EventForm from "./components/EventForm.jsx";
+import AdminEventReview from "./components/AdminEventReview.jsx";
+import AdminAssociationManager from './components/AdminAssociationManager.jsx';
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import './index.css'
 import App from './App.jsx'
@@ -17,6 +19,8 @@ createRoot(document.getElementById('root')).render(
         <Route path="/signin" element={<SignIn />} />
         <Route path="/events" element={<EventBoard />} />
         <Route path="/submit-event" element={<EventForm />} />
+        <Route path="/admin/review" element={<AdminEventReview />} />
+        <Route path="/admin/associations" element={<AdminAssociationManager />} />
       </Routes>
     </BrowserRouter>
   </GoogleOAuthProvider>,
