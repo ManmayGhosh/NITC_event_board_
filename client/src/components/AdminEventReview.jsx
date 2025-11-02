@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ModalView from "./common/ModalView.jsx"; // ✅ make sure this file exists
 
 export default function AdminEventReview() {
   const [events, setEvents] = useState([
@@ -10,6 +11,7 @@ export default function AdminEventReview() {
       venue: "Auditorium",
       associationHead: "Dr. Rao",
       associationName: "Tech Club",
+      description: "A showcase of technology innovations and workshops.",
       status: "Pending",
     },
     {
@@ -20,15 +22,19 @@ export default function AdminEventReview() {
       venue: "Open Ground",
       associationHead: "Prof. Nair",
       associationName: "Cultural Committee",
+      description: "An evening filled with music, dance, and performances.", 
       status: "Pending",
     },
   ]);
+
+  const [selectedEvent, setSelectedEvent] = useState(null); // 🟢 Added — for modal open/close control
 
   const handleAction = (id, action) => {
     const updated = events.map((event) =>
       event.id === id ? { ...event, status: action } : event
     );
     setEvents(updated);
+    setSelectedEvent(null); // 🟢 Added — close modal after action
   };
 
   return (
@@ -57,6 +63,7 @@ export default function AdminEventReview() {
               <tr
                 key={event.id}
                 className="border-b border-gray-200 hover:bg-gray-50 transition"
+                onClick={() => setSelectedEvent(event)} // 🟢 Added — open modal when row clicked
               >
                 <td className="py-3 px-4">{event.name}</td>
                 <td className="py-3 px-4">{event.date}</td>
@@ -64,7 +71,10 @@ export default function AdminEventReview() {
                 <td className="py-3 px-4">{event.venue}</td>
                 <td className="py-3 px-4">{event.associationHead}</td>
                 <td className="py-3 px-4">{event.associationName}</td> {/* ✅ Added */}
-                <td className="py-3 px-4 text-center space-x-2">
+                <td 
+                  className="py-3 px-4 text-center space-x-2"
+                  onClick={(e) => e.stopPropagation()} // Prevent row click when clicking buttons
+                >
                   <button
                     onClick={() => handleAction(event.id, "Approved")}
                     className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
@@ -101,7 +111,55 @@ export default function AdminEventReview() {
             ))}
           </tbody>
         </table>
+        {/* ✅ Popup Modal */}
+      <ModalView
+        show={!!selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        title={selectedEvent?.name || "Event Details"}
+      >
+        {selectedEvent && (
+          <div className="space-y-2">
+            <img
+              src={selectedEvent.banner}
+              alt={selectedEvent.name}
+              className="w-full h-48 object-cover rounded mb-4"
+            />
+            <p><strong>Date:</strong> {selectedEvent.date}</p>
+            <p><strong>Time:</strong> {selectedEvent.time}</p>
+            <p><strong>Venue:</strong> {selectedEvent.venue}</p>
+            <p><strong>Association:</strong> {selectedEvent.associationName}</p>
+            <p><strong>Head:</strong> {selectedEvent.associationHead}</p>
+            <p><strong>Description:</strong> {selectedEvent.description}</p>
+            <p>
+              <strong>Registration Link:</strong>{" "}
+              <a
+                href={selectedEvent.registrationLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                {selectedEvent.registrationLink}
+              </a>
+            </p>
+            <p>
+              <strong>Status:</strong>{" "}
+              <span
+                className={`font-semibold ${
+                  selectedEvent.status === "Approved"
+                    ? "text-green-600"
+                    : selectedEvent.status === "Denied"
+                    ? "text-red-600"
+                    : "text-gray-600"
+                }`}
+              >
+                {selectedEvent.status}
+              </span>
+            </p>
+          </div>
+        )}
+      </ModalView>
       </div>
+      
     </div>
   );
 }
