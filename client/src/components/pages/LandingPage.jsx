@@ -92,7 +92,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-100 to-rose-100 text-gray-800">
+    <div className="min-h-screen bg-linear-to-br from-amber-50 via-orange-100 to-rose-100 text-gray-800">
       <header className="flex justify-between items-center p-5 bg-white/80 backdrop-blur-sm shadow-md border-b border-orange-200">
         <h1 className="text-3xl font-bold text-orange-700 drop-shadow-sm">
           NITC Event Board
@@ -120,7 +120,7 @@ export default function LandingPage() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl shadow-lg hover:shadow-xl transition overflow-hidden"
+            className="bg-linear-to-br from-orange-100 to-orange-200 rounded-2xl shadow-lg hover:shadow-xl transition overflow-hidden"
           >
             <div className="h-40 bg-orange-300" />
             <div className="p-4 space-y-3">
