@@ -1,11 +1,12 @@
-import React from 'react';
+import React from "react";
 
 export default function Sidebar({ activePage, setActivePage }) {
+  // ✅ Define your navigation buttons (IDs must match Dashboard's switch-case)
   const buttons = [
-    { id: 'eventView', label: 'Event View' },
-    { id: 'submitEvent', label: 'Submit Event' },
-    { id: 'adminHandleEvent', label: 'Admin Handle Event' },
-    { id: 'adminHandleAssociation', label: 'Admin Handle Association' },
+    { id: "eventBoard", label: "Event View" },
+    { id: "eventForm", label: "Submit Event" },
+    { id: "adminEventReview", label: "Admin Handle Event" },
+    { id: "adminAssociationManager", label: "Admin Handle Association" },
   ];
 
   return (
@@ -18,9 +19,9 @@ export default function Sidebar({ activePage, setActivePage }) {
         {buttons.map((btn) => (
           <button
             key={btn.id}
-            onClick={() => setActivePage(btn.id)}
+            onClick={() => setActivePage(btn.id)} // ✅ this triggers page change
             className={`px-6 py-3 text-left hover:bg-gray-700 transition ${
-              activePage === btn.id ? 'bg-gray-700' : ''
+              activePage === btn.id ? "bg-gray-700" : ""
             }`}
           >
             {btn.label}

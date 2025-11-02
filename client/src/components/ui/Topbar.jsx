@@ -1,9 +1,15 @@
 import React from 'react';
-
+import { useNavigate } from "react-router-dom";
 export default function Topbar() {
+  const navigate = useNavigate();
+
   const handleLogout = () => {
-    // TODO: Add your logout logic (clear token, redirect, etc.)
-    console.log('Logged out');
+    // ✅ Clear any stored user session here if applicable
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+
+    // ✅ Navigate back to LandingPage
+    navigate("/");
   };
 
   return (
