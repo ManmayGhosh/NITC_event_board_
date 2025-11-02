@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ModalView from "./common/ModalView.jsx"; // ✅ make sure this file exists
+import ModalView from "../common/ModalView.jsx"; // ✅ make sure this file exists
 
 export default function AdminEventReview() {
   const [events, setEvents] = useState([

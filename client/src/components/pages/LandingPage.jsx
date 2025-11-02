@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import SignInModal from "./auth/SignInModal.jsx";
+import SignInModal from "../auth/SignInModal.jsx";
 import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {

@@ -3,10 +3,10 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SignIn from "./components/auth/SignIn.jsx";
 import GuestView from './components/auth/GuestView.jsx';
-import EventBoard from "./components/EventBoard.jsx";
-import EventForm from "./components/EventForm.jsx";
-import AdminEventReview from "./components/AdminEventReview.jsx";
-import AdminAssociationManager from './components/AdminAssociationManager.jsx';
+import EventBoard from "./components/pages/EventBoard.jsx";
+import EventForm from "./components/pages/EventForm.jsx";
+import AdminEventReview from "./components/pages/AdminEventReview.jsx";
+import AdminAssociationManager from "./components/pages/AdminAssociationManager.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import './index.css'
 import App from './App.jsx'

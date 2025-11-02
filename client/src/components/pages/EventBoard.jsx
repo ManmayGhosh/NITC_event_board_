@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import ModalView from "./common/ModalView";
+import ModalView from "../common/ModalView";
 
 export default function EventBoard() {
   const [events, setEvents] = useState([]);

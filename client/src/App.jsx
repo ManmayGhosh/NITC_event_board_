@@ -1,5 +1,5 @@
 // import EventBoard from './components/EventBoard.jsx';
-import LandingPage from './components/LandingPage.jsx';
+import LandingPage from './components/pages/LandingPage.jsx';
 function App() {
   return (
     <LandingPage />
