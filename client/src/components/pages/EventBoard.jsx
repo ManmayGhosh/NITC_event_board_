@@ -9,34 +9,37 @@ export default function EventBoard() {
   const [sortBy, setSortBy] = useState("name_asc");
   const [selectedEvent, setSelectedEvent] = useState(null);
 
+  console.log("🟢 useEffect triggered: fetching events..."); //Testing if connection works
+
   useEffect(() => {
     let mounted = true;
-    axios.get("http://localhost:5000/events")
-    .then((res) => {
-      console.log("📦 Event data from backend:", res.data);
-      const payload = Array.isArray(res.data) ? res.data : res.data.data;
-      setEvents(payload || []);
-    })
-    .catch((err) => {
-      console.error("❌ Failed to fetch events:", err);
-      if (err.response) console.log("Server responded with:", err.response.data);
-      if (err.request) console.log("No response received:", err.request);
-    })
-    .finally(() => setLoading(false));
+    axios
+      .get("http://localhost:5000/events")
+      .then((res) => {
+        console.log("📦 Event data from backend:", res.data);
+        const payload = Array.isArray(res.data) ? res.data : res.data.data;
+        setEvents(payload || []);
+      })
+      .catch((err) => {
+        console.error("❌ Failed to fetch events:", err);
+        if (err.response)
+          console.log("Server responded with:", err.response.data);
+        if (err.request) console.log("No response received:", err.request);
+      })
+      .finally(() => setLoading(false));
     return () => (mounted = false);
   }, []);
-  
 
-    // 🔹 Helper to format backend ISO date (e.g. 2025-11-12T00:00:00.000Z) to readable form
-    const formatDate = (dateStr) => {
-      if (!dateStr) return "";
-      const date = new Date(dateStr);
-      return date.toLocaleDateString("en-IN", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    };  
+  // 🔹 Helper to format backend ISO date (e.g. 2025-11-12T00:00:00.000Z) to readable form
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   if (loading) {
     return (
@@ -101,11 +104,16 @@ export default function EventBoard() {
             onClick={() => setSelectedEvent(event)}
           >
             <img
-              src={event.banner || `https://picsum.photos/seed/${event._id}/800/400`}
+              src={
+                event.banner ||
+                `https://picsum.photos/seed/${event._id}/800/400`
+              }
               alt={event.name}
               className="w-full h-40 object-cover rounded"
             />
-            <h3 className="text-lg font-semibold text-pink-700 mt-3">{event.name}</h3>
+            <h3 className="text-lg font-semibold text-pink-700 mt-3">
+              {event.name}
+            </h3>
             <p className="text-sm text-gray-600 mt-1">
               📅 {formatDate(event.date)} • {event.time} <br /> 📍 {event.venue}
             </p>
@@ -123,24 +131,35 @@ export default function EventBoard() {
         {selectedEvent && (
           <div className="space-y-2">
             <img
-              src={selectedEvent.banner || `https://picsum.photos/seed/${selectedEvent._id}/800/400`}
+              src={
+                selectedEvent.banner ||
+                `https://picsum.photos/seed/${selectedEvent._id}/800/400`
+              }
               alt={selectedEvent.name}
               className="rounded w-full h-48 object-cover mb-4"
             />
-            <p><strong>Date:</strong> {formatDate(selectedEvent.date)}</p>
-            <p><strong>Time:</strong> {selectedEvent.time}</p>
-            <p><strong>Venue:</strong> {selectedEvent.venue}</p>
-            <p><strong>Head:</strong> {selectedEvent.associationHead}</p>
             <p>
-                <strong>Registration Link:</strong>{" "}
-                <a
-                  href={selectedEvent.registrationLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  {selectedEvent.registrationLink}
-                </a>
+              <strong>Date:</strong> {formatDate(selectedEvent.date)}
+            </p>
+            <p>
+              <strong>Time:</strong> {selectedEvent.time}
+            </p>
+            <p>
+              <strong>Venue:</strong> {selectedEvent.venue}
+            </p>
+            <p>
+              <strong>Head:</strong> {selectedEvent.associationHead}
+            </p>
+            <p>
+              <strong>Registration Link:</strong>{" "}
+              <a
+                href={selectedEvent.registrationLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                {selectedEvent.registrationLink}
+              </a>
             </p>
           </div>
         )}

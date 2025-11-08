@@ -16,7 +16,7 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
 
       {/* Guest View (no sidebar) */}
-      <Route path="/guest/events" element={<Dashboard activePage="EventBoard" />} />
+      <Route path="/guest/events" element={<Dashboard />} />
 
       {/* User Routes */}
       <Route path="/user/events" element={<Dashboard activePage="EventBoard" />} />

@@ -10,7 +10,7 @@ import AdminAssociationManager from "../pages/AdminAssociationManager.jsx";
 
 export default function Dashboard({ activePage }) {
   // const [activePage, setActivePage] = useState("eventBoard");
-const location = useLocation();
+  const location = useLocation();
   const path = location.pathname;
   const isGuest = location.pathname.startsWith("/guest"); // 🟩 detect guest view
 
@@ -30,13 +30,14 @@ const location = useLocation();
   //   }
   // };
 
-const renderPage = () => {
-    if (path.endsWith("/submit_event")) return <EventForm />;
-    if (path.endsWith("/admin_event_review")) return <AdminEventReview />;
-    if (path.endsWith("/admin_handle_association")) return <AdminAssociationManager />;
-    return <EventBoard />; // default page
+  const renderPage = () => {
+    if (path.includes("/submit_event")) return <EventForm />;
+    if (path.includes("/admin_event_review")) return <AdminEventReview />;
+    if (path.includes("/admin_handle_association"))
+      return <AdminAssociationManager />;
+    return <EventBoard />; // fallback for /guest/events or /user/events
   };
-  
+
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
       {!isGuest && <Sidebar />}
@@ -47,4 +48,3 @@ const renderPage = () => {
     </div>
   );
 }
-
