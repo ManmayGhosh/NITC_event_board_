@@ -36,11 +36,29 @@ const EventForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const { eventName, associationName, associationHead, email, date, time, venue } = formData;
+    const {
+      eventName,
+      associationName,
+      associationHead,
+      email,
+      date,
+      time,
+      venue,
+    } = formData;
 
     // ✅ Mandatory fields validation
-    if (!eventName || !associationName || !associationHead || !email || !date || !time || !venue) {
-      alert("⚠️ Please fill all mandatory fields (Event Name, Association Name, Association Head, Email, Date, Time, Venue).");
+    if (
+      !eventName ||
+      !associationName ||
+      !associationHead ||
+      !email ||
+      !date ||
+      !time ||
+      !venue
+    ) {
+      alert(
+        "⚠️ Please fill all mandatory fields (Event Name, Association Name, Association Head, Email, Date, Time, Venue)."
+      );
       return;
     }
 
