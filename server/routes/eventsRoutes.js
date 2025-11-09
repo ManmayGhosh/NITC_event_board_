@@ -2,74 +2,109 @@ import express from "express";
 const router = express.Router();
 import { Event } from "../MongoModels/eventModel.js";
 
-/*const events = [
-  {
-    _id: "1",
-    name: "Tech Fest",
-    date: "2025-11-12",
-    time: "10:00",
-    venue: "Auditorium",
-    associationHead: "Dr. Rao",
-    banner: "https://picsum.photos/seed/1/800/400"
-  },
-  {
-    _id: "2",
-    name: "Cultural Night",
-    date: "2025-12-01",
-    time: "19:00",
-    venue: "Open Ground",
-    associationHead: "Prof. Nair",
-    banner: "https://picsum.photos/seed/2/800/400"
-  },
-  // ... more events ...
-];
-
-router.get("/", (req, res) => res.json(events));
-
-*/
-
-// Route to save event info to database
-router.post("/", async (request, response) => {
+// ✅ Create a new event
+router.post("/", async (req, res) => {
   try {
-    const { name, date, time, venue, associationHead, banner } = request.body;
+    const {
+      name,
+      date,
+      email,
+      startDate,
+      endDate,
+      startTime,
+      endTime,
+      venue,
+      associationName,
+      associationHead,
+      banner,
+      description,
+      registrationLink,
+    } = req.body;
 
-    // Check for missing fields
-    if (!name || !date || !time || !venue || !associationHead || !banner) {
-      return response.status(400).send({
+    // Check required fields
+    if (
+      !name ||
+      !date ||
+      !email ||
+      !startDate ||
+      !endDate ||
+      !startTime ||
+      !endTime ||
+      !venue ||
+      !associationName ||
+      !associationHead ||
+      !banner
+    ) {
+      return res.status(400).json({
         message:
-          "Please provide all required fields: name, date, time, venue, associationHead, and banner.",
+          "Please provide all required fields: name, date, email, startDate, endDate, startTime, endTime, venue, associationName, associationHead, and banner.",
       });
     }
 
-    // Create a new event document
-    const newEvent = {
-      name:request.body.name,
-      date:request.body.date,
-      time:request.body.time,
-      venue:request.body.venue,
-      associationHead:request.body.associationHead,
-      banner:request.body.banner,
-    };
+    // Create and save event
+    const newEvent = new Event({
+      name,
+      date,
+      email,
+      startDate,
+      endDate,
+      startTime,
+      endTime,
+      venue,
+      associationName,
+      associationHead,
+      banner,
+      description,
+      registrationLink,
+      status: "Pending", // default
+    });
 
-    const event = await Event.create(newEvent);
-    return response.status(201).send(event);
+    const savedEvent = await newEvent.save();
+    res.status(201).json(savedEvent);
   } catch (error) {
-    console.error(error.message);
-    response.status(500).send({ message: error.message });
+    console.error("Error saving event:", error.message);
+    res.status(500).json({ message: error.message });
   }
 });
 
-// Route to get all events from the database
-router.get("/", async (request, response) => {
+// ✅ Get all events
+router.get("/", async (req, res) => {
   try {
     const events = await Event.find({});
-    return response.status(200).json({
-      count: events.length,
-      data: events,
-    });
+    // Return a plain array to match frontend expectations
+    res.status(200).json(events);
   } catch (error) {
-    console.error(error.message);
-    response.status(500).send({ message: error.message });
+    console.error("Error fetching events:", error.message);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ✅ Update event status (Admin)
+router.patch("/:id/status", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (
+      !["Pending", "Approved", "Denied", "Review Requested"].includes(status)
+    ) {
+      return res.status(400).json({ error: "Invalid status value" });
+    }
+
+    const updatedEvent = await Event.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedEvent) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    res.json(updatedEvent);
+  } catch (err) {
+    console.error("Error updating event status:", err);
+    res.status(500).json({ error: "Failed to update event status" });
   }
 });
 

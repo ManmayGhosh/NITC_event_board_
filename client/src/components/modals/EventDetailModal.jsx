@@ -90,7 +90,7 @@ export default function EventDetailModal({
             Association: <span className="font-medium">{event?.associationName || "-"}</span>
           </p>
           <p className="text-sm text-gray-600">
-            Head: {event?.associationHead || "-"}
+            Head: {event?.associationName || "-"}
           </p>
           <p className="text-sm text-gray-600">
             Submitted by: {event?.email || "-"}

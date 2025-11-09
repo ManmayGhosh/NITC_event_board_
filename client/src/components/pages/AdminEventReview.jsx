@@ -1,41 +1,74 @@
-import React, { useState } from "react";
-import ModalView from "../common/ModalView.jsx"; // ✅ make sure this file exists
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import ModalView from "../common/ModalView.jsx";
 
 export default function AdminEventReview() {
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      name: "Tech Fest 2025",
-      date: "2025-11-20",
-      time: "10:00 AM",
-      venue: "Auditorium",
-      associationHead: "Dr. Rao",
-      associationName: "Tech Club",
-      description: "A showcase of technology innovations and workshops.",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      name: "Cultural Night",
-      date: "2025-12-01",
-      time: "7:00 PM",
-      venue: "Open Ground",
-      associationHead: "Prof. Nair",
-      associationName: "Cultural Committee",
-      description: "An evening filled with music, dance, and performances.", 
-      status: "Pending",
-    },
-  ]);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
-  const [selectedEvent, setSelectedEvent] = useState(null); // 🟢 Added — for modal open/close control
+  // 🟢 Fetch events from backend (MongoDB)
+  useEffect(() => {
+    console.log("🟢 useEffect triggered: fetching events for admin review...");
 
-  const handleAction = (id, action) => {
-    const updated = events.map((event) =>
-      event.id === id ? { ...event, status: action } : event
-    );
-    setEvents(updated);
-    setSelectedEvent(null); // 🟢 Added — close modal after action
+    axios
+      .get("http://localhost:5000/events")
+      .then((res) => {
+        console.log("📦 Admin event data from backend:", res.data);
+        const payload = Array.isArray(res.data) ? res.data : res.data.data;
+        setEvents(payload || []);
+      })
+      .catch((err) => {
+        console.error("❌ Failed to fetch events:", err);
+        if (err.response)
+          console.log("Server responded with:", err.response.data);
+        if (err.request) console.log("No response received:", err.request);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  // 🟡 Handle admin approval / denial / review
+  const handleAction = async (id, action) => {
+    try {
+      await axios.patch(`http://localhost:5000/events/${id}/status`, {
+        status: action,
+      });
+
+      // Update UI instantly
+      setEvents((prev) =>
+        prev.map((event) =>
+          event._id === id ? { ...event, status: action } : event
+        )
+      );
+
+      setSelectedEvent(null);
+      console.log(`✅ Event ${id} updated to ${action}`);
+    } catch (err) {
+      console.error("❌ Failed to update event status:", err);
+      alert("Could not update event status. Check backend console.");
+    }
   };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6 min-h-screen bg-linear-to-br from-gray-50 to-blue-100">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 bg-blue-200 w-1/3 rounded" />
+          <div className="h-48 bg-blue-200 rounded" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-100 to-blue-100 p-6">
@@ -52,7 +85,7 @@ export default function AdminEventReview() {
               <th className="py-3 px-4 text-left">Time</th>
               <th className="py-3 px-4 text-left">Venue</th>
               <th className="py-3 px-4 text-left">Association Head</th>
-              <th className="py-3 px-4 text-left">Association Name</th> {/* ✅ Added */}
+              <th className="py-3 px-4 text-left">Association Name</th>
               <th className="py-3 px-4 text-center">Action</th>
               <th className="py-3 px-4 text-center">Status</th>
             </tr>
@@ -61,34 +94,34 @@ export default function AdminEventReview() {
           <tbody>
             {events.map((event) => (
               <tr
-                key={event.id}
+                key={event._id}
                 className="border-b border-gray-200 hover:bg-gray-50 transition"
-                onClick={() => setSelectedEvent(event)} // 🟢 Added — open modal when row clicked
+                onClick={() => setSelectedEvent(event)}
               >
                 <td className="py-3 px-4">{event.name}</td>
-                <td className="py-3 px-4">{event.date}</td>
+                <td className="py-3 px-4">{formatDate(event.date)}</td>
                 <td className="py-3 px-4">{event.time}</td>
                 <td className="py-3 px-4">{event.venue}</td>
                 <td className="py-3 px-4">{event.associationHead}</td>
-                <td className="py-3 px-4">{event.associationName}</td> {/* ✅ Added */}
-                <td 
+                <td className="py-3 px-4">{event.associationName}</td>
+                <td
                   className="py-3 px-4 text-center space-x-2"
-                  onClick={(e) => e.stopPropagation()} // Prevent row click when clicking buttons
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <button
-                    onClick={() => handleAction(event.id, "Approved")}
+                    onClick={() => handleAction(event._id, "Approved")}
                     className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
                   >
                     Allow
                   </button>
                   <button
-                    onClick={() => handleAction(event.id, "Denied")}
+                    onClick={() => handleAction(event._id, "Denied")}
                     className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                   >
                     Deny
                   </button>
                   <button
-                    onClick={() => handleAction(event.id, "Review Requested")}
+                    onClick={() => handleAction(event._id, "Review Requested")}
                     className="px-3 py-1 bg-yellow-400 text-black rounded hover:bg-yellow-500"
                   >
                     Review
@@ -105,61 +138,63 @@ export default function AdminEventReview() {
                       : "text-gray-600"
                   }`}
                 >
-                  {event.status}
+                  {event.status || "Pending"}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {/* ✅ Popup Modal */}
-      <ModalView
-        show={!!selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-        title={selectedEvent?.name || "Event Details"}
-      >
-        {selectedEvent && (
-          <div className="space-y-2">
-            <img
-              src={selectedEvent.banner}
-              alt={selectedEvent.name}
-              className="w-full h-48 object-cover rounded mb-4"
-            />
-            <p><strong>Date:</strong> {selectedEvent.date}</p>
-            <p><strong>Time:</strong> {selectedEvent.time}</p>
-            <p><strong>Venue:</strong> {selectedEvent.venue}</p>
-            <p><strong>Association:</strong> {selectedEvent.associationName}</p>
-            <p><strong>Head:</strong> {selectedEvent.associationHead}</p>
-            <p><strong>Description:</strong> {selectedEvent.description}</p>
-            <p>
-              <strong>Registration Link:</strong>{" "}
-              <a
-                href={selectedEvent.registrationLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                {selectedEvent.registrationLink}
-              </a>
-            </p>
-            <p>
-              <strong>Status:</strong>{" "}
-              <span
-                className={`font-semibold ${
-                  selectedEvent.status === "Approved"
-                    ? "text-green-600"
-                    : selectedEvent.status === "Denied"
-                    ? "text-red-600"
-                    : "text-gray-600"
-                }`}
-              >
-                {selectedEvent.status}
-              </span>
-            </p>
-          </div>
-        )}
-      </ModalView>
+
+        {/* ✅ Event Details Modal */}
+        <ModalView
+          show={!!selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          title={selectedEvent?.name || "Event Details"}
+        >
+          {selectedEvent && (
+            <div className="space-y-2">
+              <img
+                src={
+                  selectedEvent.banner ||
+                  `https://picsum.photos/seed/${selectedEvent._id}/800/400`
+                }
+                alt={selectedEvent.name}
+                className="w-full h-48 object-cover rounded mb-4"
+              />
+              <p><strong>Date:</strong> {formatDate(selectedEvent.date)}</p>
+              <p><strong>Time:</strong> {selectedEvent.time}</p>
+              <p><strong>Venue:</strong> {selectedEvent.venue}</p>
+              <p><strong>Association:</strong> {selectedEvent.associationName}</p>
+              <p><strong>Head:</strong> {selectedEvent.associationHead}</p>
+              <p><strong>Description:</strong> {selectedEvent.description}</p>
+              <p><strong>Status:</strong> {selectedEvent.status || "Pending"}</p>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  onClick={() => handleAction(selectedEvent._id, "Approved")}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  Allow
+                </button>
+                <button
+                  onClick={() => handleAction(selectedEvent._id, "Denied")}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                >
+                  Deny
+                </button>
+                <button
+                  onClick={() =>
+                    handleAction(selectedEvent._id, "Review Requested")
+                  }
+                  className="px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500"
+                >
+                  Review
+                </button>
+              </div>
+            </div>
+          )}
+        </ModalView>
       </div>
-      
     </div>
   );
 }
