@@ -100,4 +100,40 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+/**
+ * @route   GET /heads/check
+ * @desc    Check if a given email belongs to an association head
+ * @query   ?email=<email>
+ * @returns { exists: boolean, head?: object }
+ */
+router.get("/check", async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email query parameter is required." });
+    }
+
+    // Case-insensitive email match
+    const head = await AdminHandlingAssociationHead.findOne({
+      email: { $regex: new RegExp("^" + email + "$", "i") },
+    });
+
+    if (head) {
+      return res.status(200).json({
+        exists: true,
+        head,
+      });
+    } else {
+      return res.status(200).json({
+        exists: false,
+      });
+    }
+  } catch (error) {
+    console.error("Error checking association head:", error.message);
+    res.status(500).json({ error: "Server error while checking association head." });
+  }
+});
+
+
 export default router;

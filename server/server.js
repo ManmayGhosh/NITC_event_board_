@@ -14,7 +14,9 @@ app.use(express.json());
 
 app.use("/events", eventsRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/heads", headsRoutes)
+app.use("/heads", headsRoutes);
+app.use("/uploads", express.static("uploads"));
+
 
 //Connects MongoDB to server
 mongoose

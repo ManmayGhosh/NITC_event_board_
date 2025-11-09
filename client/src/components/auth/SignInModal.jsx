@@ -5,37 +5,67 @@ import axios from "axios";
 export default function SignInModal({ mode, onClose, onAuthenticated }) {
   const handleSuccess = async (credentialResponse) => {
     try {
+      // Step 1: Verify Google token with backend
       const res = await axios.post("http://localhost:5000/api/auth/google", {
         token: credentialResponse.credential,
       });
 
-      if (res.data?.success) {
-        const user = res.data.user;
-        const email = user.email?.toLowerCase();
-        let role = "user";
-
-        // 🟩 Assign roles dynamically
-        if (email === "joseph_m250356cs@nitc.ac.in") role = "admin";
-        else if (email === "head@nitc.ac.in") role = "association_head";
-        else if (email === "guest@nitc.ac.in" || mode === "guest") role = "guest";
-
-        const userWithRole = { ...user, role };
-        localStorage.setItem("mode", role);
-        localStorage.setItem("user", JSON.stringify(userWithRole));
-        localStorage.setItem("token", res.data.token);
-
-        // 🟩 Redirect after auth
-        if (role === "guest") window.location.href = "/guest/events";
-        else if (role === "admin") window.location.href = "/admin/admin_event_review";
-        else window.location.href = "/user/events";
-
-        onAuthenticated(userWithRole, res.data.token, mode);
-      } else {
+      if (!res.data?.success) {
         alert(res.data?.message || "Authentication failed");
+        return;
       }
+
+      const user = res.data.user;
+      const email = user.email?.toLowerCase();
+      let role = "guest"; // default fallback role
+
+      // 🧠 Step 2: Check for admin
+      if (email === "admin@nitc.ac.in") {
+        role = "admin";
+      } else {
+      // 🧠 Step 3: Check if user is association head from DB
+        try {
+          const checkRes = await axios.get(
+            "http://localhost:5000/heads/check",
+            {
+              params: { email },
+            }
+          );
+
+          if (checkRes.data.exists) {
+            role = "association_head";
+            console.log(`✅ ${email} recognized as association head`);
+          } else if (mode === "guest") {
+            role = "guest";
+            console.log(`👤 ${email} signed in as guest`);
+          } else {
+            role = "guest";
+            console.log(`👤 ${email} not found in association head list`);
+          }
+        } catch (err) {
+          console.error("Error checking association heads:", err);
+          role = "guest";
+        }
+      }
+
+      // 🟩 Store user data
+      const userWithRole = { ...user, role };
+      localStorage.setItem("mode", role);
+      localStorage.setItem("user", JSON.stringify(userWithRole));
+      localStorage.setItem("token", res.data.token);
+
+      // 🧭 Redirect based on role
+      if (role === "guest") window.location.href = "/guest/events";
+      else if (role === "admin")
+        window.location.href = "/admin/admin_event_review";
+      else if (role === "association_head")
+        window.location.href = "/user/events";
+      else window.location.href = "/";
+
+      onAuthenticated(userWithRole, res.data.token, mode);
     } catch (err) {
-      console.error(err);
-      alert("Authentication failed — check console");
+      console.error("❌ Authentication error:", err);
+      alert("Authentication failed — check console for details.");
     }
   };
 
