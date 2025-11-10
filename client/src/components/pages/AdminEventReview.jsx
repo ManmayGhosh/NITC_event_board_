@@ -7,34 +7,71 @@ export default function AdminEventReview() {
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  // 🟢 Fetch events from backend (MongoDB)
-  useEffect(() => {
-    console.log("🟢 useEffect triggered: fetching events for admin review...");
+  // Track recently denied events (for double confirmation)
+  const [pendingDelete, setPendingDelete] = useState(null);
 
+  // 🟢 Fetch events from backend
+  useEffect(() => {
     axios
       .get("http://localhost:5000/events")
       .then((res) => {
-        console.log("📦 Admin event data from backend:", res.data);
         const payload = Array.isArray(res.data) ? res.data : res.data.data;
         setEvents(payload || []);
       })
       .catch((err) => {
         console.error("❌ Failed to fetch events:", err);
-        if (err.response)
-          console.log("Server responded with:", err.response.data);
-        if (err.request) console.log("No response received:", err.request);
       })
       .finally(() => setLoading(false));
   }, []);
 
-  // 🟡 Handle admin approval / denial / review
+  // 🟡 Handle admin actions
   const handleAction = async (id, action) => {
     try {
+      if (action === "Denied") {
+        const event = events.find((e) => e._id === id);
+
+        // Step 1: If not yet pending deletion → mark as Denied
+        if (pendingDelete !== id) {
+          await axios.patch(`http://localhost:5000/events/${id}/status`, {
+            status: "Denied",
+          });
+
+          setEvents((prev) =>
+            prev.map((e) =>
+              e._id === id ? { ...e, status: "Denied" } : e
+            )
+          );
+          setPendingDelete(id);
+
+          alert(
+            "⚠️ Event marked as Denied.\nClick 'Deny' again to permanently delete this event."
+          );
+          return;
+        }
+
+        // Step 2: Confirm permanent deletion
+        const confirmDelete = window.confirm(
+          "🚨 This will permanently delete the event. Continue?"
+        );
+        if (!confirmDelete) {
+          setPendingDelete(null);
+          return;
+        }
+
+        await axios.delete(`http://localhost:5000/events/${id}`);
+        setEvents((prev) => prev.filter((event) => event._id !== id));
+        setSelectedEvent(null);
+        setPendingDelete(null);
+
+        alert("🗑️ Event permanently deleted.");
+        return;
+      }
+
+      // 🟩 For other actions (Approve / Review)
       await axios.patch(`http://localhost:5000/events/${id}/status`, {
         status: action,
       });
 
-      // Update UI instantly
       setEvents((prev) =>
         prev.map((event) =>
           event._id === id ? { ...event, status: action } : event
@@ -42,10 +79,11 @@ export default function AdminEventReview() {
       );
 
       setSelectedEvent(null);
+      setPendingDelete(null);
       console.log(`✅ Event ${id} updated to ${action}`);
     } catch (err) {
-      console.error("❌ Failed to update event status:", err);
-      alert("Could not update event status. Check backend console.");
+      console.error("❌ Action failed:", err);
+      alert("Action failed. Check console for details.");
     }
   };
 
@@ -100,7 +138,9 @@ export default function AdminEventReview() {
               >
                 <td className="py-3 px-4">{event.name}</td>
                 <td className="py-3 px-4">{formatDate(event.date)}</td>
-                <td className="py-3 px-4">{event.time}</td>
+                <td className="py-3 px-4">
+                  {event.startTime} - {event.endTime}
+                </td>
                 <td className="py-3 px-4">{event.venue}</td>
                 <td className="py-3 px-4">{event.associationHead}</td>
                 <td className="py-3 px-4">{event.associationName}</td>
@@ -114,12 +154,18 @@ export default function AdminEventReview() {
                   >
                     Allow
                   </button>
+
                   <button
                     onClick={() => handleAction(event._id, "Denied")}
-                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    className={`px-3 py-1 rounded text-white ${
+                      pendingDelete === event._id
+                        ? "bg-red-700 animate-pulse"
+                        : "bg-red-500 hover:bg-red-600"
+                    }`}
                   >
-                    Deny
+                    {pendingDelete === event._id ? "Confirm Delete" : "Deny"}
                   </button>
+
                   <button
                     onClick={() => handleAction(event._id, "Review Requested")}
                     className="px-3 py-1 bg-yellow-400 text-black rounded hover:bg-yellow-500"
@@ -162,7 +208,10 @@ export default function AdminEventReview() {
                 className="w-full h-48 object-cover rounded mb-4"
               />
               <p><strong>Date:</strong> {formatDate(selectedEvent.date)}</p>
-              <p><strong>Time:</strong> {selectedEvent.time}</p>
+              <p>
+                <strong>Time:</strong> {selectedEvent.startTime} -{" "}
+                {selectedEvent.endTime}
+              </p>
               <p><strong>Venue:</strong> {selectedEvent.venue}</p>
               <p><strong>Association:</strong> {selectedEvent.associationName}</p>
               <p><strong>Head:</strong> {selectedEvent.associationHead}</p>
@@ -178,9 +227,15 @@ export default function AdminEventReview() {
                 </button>
                 <button
                   onClick={() => handleAction(selectedEvent._id, "Denied")}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                  className={`px-4 py-2 rounded text-white ${
+                    pendingDelete === selectedEvent._id
+                      ? "bg-red-700 animate-pulse"
+                      : "bg-red-600 hover:bg-red-700"
+                  }`}
                 >
-                  Deny
+                  {pendingDelete === selectedEvent._id
+                    ? "Confirm Delete"
+                    : "Deny"}
                 </button>
                 <button
                   onClick={() =>

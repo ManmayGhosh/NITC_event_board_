@@ -20,10 +20,10 @@ export default function SignInModal({ mode, onClose, onAuthenticated }) {
       let role = "guest"; // default fallback role
 
       // 🧠 Step 2: Check for admin
-      if (email === "admin@nitc.ac.in") {
+      if (email === "joseph_m250356cs@nitc.ac.in") {
         role = "admin";
       } else {
-      // 🧠 Step 3: Check if user is association head from DB
+        // 🧠 Step 3: Check if user is association head from DB
         try {
           const checkRes = await axios.get(
             "http://localhost:5000/heads/check",
