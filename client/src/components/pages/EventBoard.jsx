@@ -116,8 +116,10 @@ export default function EventBoard() {
               alt={selectedEvent.name}
               className="rounded w-full h-48 object-cover mb-4"
             />
-            <p><strong>Date:</strong> {selectedEvent.date}</p>
-            <p><strong>Time:</strong> {selectedEvent.time}</p>
+            <p><strong>Start Date:</strong> {selectedEvent.startDate}</p>
+            <p><strong>Start Time:</strong> {selectedEvent.startTime}</p>
+            <p><strong>End Date:</strong> {selectedEvent. endDate}</p>
+            <p><strong>End Time:</strong> {selectedEvent. endTime}</p>
             <p><strong>Venue:</strong> {selectedEvent.venue}</p>
             <p><strong>Association:</strong> {selectedEvent.associationName}</p>
             <p><strong>Head:</strong> {selectedEvent.associationHead}</p>

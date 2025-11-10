@@ -6,8 +6,10 @@ const EventForm = () => {
     associationName: "",
     associationHead: "",
     email: "",
-    date: "",
-    time: "",
+    startDate: "",
+    startTime: "",
+    endDate: "",
+    endTime: "",
     venue: "",
     description: "",
     poster: null,
@@ -23,7 +25,7 @@ const EventForm = () => {
 
       const validTypes = ["image/png", "image/jpeg"];
       if (!validTypes.includes(file.type)) {
-        alert("❌ Only PNG and JPG files are allowed!");
+        alert("Only PNG and JPG files are allowed!");
         e.target.value = "";
         return;
       }
@@ -36,10 +38,12 @@ const EventForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const { eventName, associationName, associationHead, email, date, time, venue } = formData;
+    const { eventName, associationName, associationHead, email, startDate, startTime, endDate, 
+    endTime , venue } = formData;
 
     // ✅ Mandatory fields validation
-    if (!eventName || !associationName || !associationHead || !email || !date || !time || !venue) {
+    if (!eventName || !associationName || !associationHead || !email || !startDate ||
+    !startTime || !endDate || !endTime || !venue) {
       alert("⚠️ Please fill all mandatory fields (Event Name, Association Name, Association Head, Email, Date, Time, Venue).");
       return;
     }
@@ -142,7 +146,7 @@ const EventForm = () => {
         <div className="flex gap-3 mb-4">
           <div className="flex-1">
             <label className="block text-gray-700 font-medium mb-1">
-              Date <span className="text-red-500">*</span>
+              Start Date <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
@@ -156,7 +160,39 @@ const EventForm = () => {
 
           <div className="flex-1">
             <label className="block text-gray-700 font-medium mb-1">
-              Time <span className="text-red-500">*</span>
+              Start Time <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="time"
+              name="time"
+              value={formData.time}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+        </div>
+
+{/* ✅ Added: End Date & Time Section */}
+        {/* Date & Time */}
+        <div className="flex gap-3 mb-4">
+          <div className="flex-1">
+            <label className="block text-gray-700 font-medium mb-1">
+              End Date <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div className="flex-1">
+            <label className="block text-gray-700 font-medium mb-1">
+              End Time <span className="text-red-500">*</span>
             </label>
             <input
               type="time"

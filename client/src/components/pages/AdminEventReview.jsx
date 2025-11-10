@@ -6,8 +6,10 @@ export default function AdminEventReview() {
     {
       id: 1,
       name: "Tech Fest 2025",
-      date: "2025-11-20",
-      time: "10:00 AM",
+      startDate: "2025-11-20",
+      startTime: "10:00 AM",
+      endDate: "2025-11-22",
+      endTime: "1:00 PM",
       venue: "Auditorium",
       associationHead: "Dr. Rao",
       associationName: "Tech Club",
@@ -17,8 +19,10 @@ export default function AdminEventReview() {
     {
       id: 2,
       name: "Cultural Night",
-      date: "2025-12-01",
-      time: "7:00 PM",
+      startDate: "2025-12-01",
+      startTime: "7:00 PM",
+      endDate: "2025-12-02",
+      endTime: "10:00 AM",
       venue: "Open Ground",
       associationHead: "Prof. Nair",
       associationName: "Cultural Committee",
@@ -48,10 +52,12 @@ export default function AdminEventReview() {
           <thead className="bg-blue-600 text-white">
             <tr>
               <th className="py-3 px-4 text-left">Event Name</th>
-              <th className="py-3 px-4 text-left">Date</th>
-              <th className="py-3 px-4 text-left">Time</th>
+              <th className="py-3 px-4 text-left">Start Date</th>
+              {/* <th className="py-3 px-4 text-left">Start Time</th> */}
+              <th className="py-3 px-4 text-left">End Date</th>
+              {/* <th className="py-3 px-4 text-left">End Time</th> */}
               <th className="py-3 px-4 text-left">Venue</th>
-              <th className="py-3 px-4 text-left">Association Head</th>
+              {/* <th className="py-3 px-4 text-left">Association Head</th> */}
               <th className="py-3 px-4 text-left">Association Name</th> {/* ✅ Added */}
               <th className="py-3 px-4 text-center">Action</th>
               <th className="py-3 px-4 text-center">Status</th>
@@ -66,10 +72,12 @@ export default function AdminEventReview() {
                 onClick={() => setSelectedEvent(event)} // 🟢 Added — open modal when row clicked
               >
                 <td className="py-3 px-4">{event.name}</td>
-                <td className="py-3 px-4">{event.date}</td>
-                <td className="py-3 px-4">{event.time}</td>
+                <td className="py-3 px-4">{event.startDate}</td>
+                {/* <td className="py-3 px-4">{event.startTime}</td> */}
+                <td className="py-3 px-4">{event.endDate || "-"}</td>
+                {/* <td className="py-3 px-4">{event.endTime || "-"}</td> */}
                 <td className="py-3 px-4">{event.venue}</td>
-                <td className="py-3 px-4">{event.associationHead}</td>
+                {/* <td className="py-3 px-4">{event.associationHead}</td> */}
                 <td className="py-3 px-4">{event.associationName}</td> {/* ✅ Added */}
                 <td 
                   className="py-3 px-4 text-center space-x-2"
@@ -124,8 +132,10 @@ export default function AdminEventReview() {
               alt={selectedEvent.name}
               className="w-full h-48 object-cover rounded mb-4"
             />
-            <p><strong>Date:</strong> {selectedEvent.date}</p>
-            <p><strong>Time:</strong> {selectedEvent.time}</p>
+           <p><strong>Start Date:</strong> {selectedEvent.startDate}</p>
+            <p><strong>Start Time:</strong> {selectedEvent.startTime}</p>
+            <p><strong>End Date:</strong> {selectedEvent.endDate || "-"}</p>
+            <p><strong>End Time:</strong> {selectedEvent.endTime || "-"}</p>
             <p><strong>Venue:</strong> {selectedEvent.venue}</p>
             <p><strong>Association:</strong> {selectedEvent.associationName}</p>
             <p><strong>Head:</strong> {selectedEvent.associationHead}</p>
