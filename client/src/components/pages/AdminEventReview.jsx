@@ -12,6 +12,7 @@ export default function AdminEventReview() {
       endTime: "1:00 PM",
       venue: "Auditorium",
       associationHead: "Dr. Rao",
+      email: "drao@nitc.ac.in",
       associationName: "Tech Club",
       description: "A showcase of technology innovations and workshops.",
       status: "Pending",
@@ -25,6 +26,7 @@ export default function AdminEventReview() {
       endTime: "10:00 AM",
       venue: "Open Ground",
       associationHead: "Prof. Nair",
+      email: "pnair@nitc.ac.in",
       associationName: "Cultural Committee",
       description: "An evening filled with music, dance, and performances.", 
       status: "Pending",
@@ -138,6 +140,7 @@ export default function AdminEventReview() {
             <p><strong>End Time:</strong> {selectedEvent.endTime || "-"}</p>
             <p><strong>Venue:</strong> {selectedEvent.venue}</p>
             <p><strong>Association:</strong> {selectedEvent.associationName}</p>
+            <p><strong>Email:</strong> {selectedEvent.email}</p>
             <p><strong>Head:</strong> {selectedEvent.associationHead}</p>
             <p><strong>Description:</strong> {selectedEvent.description}</p>
             <p>
