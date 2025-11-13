@@ -1,6 +1,7 @@
 import express from "express";
 import { sendEmail } from "../utils/emailService.js";
 import { Event } from "../MongoModels/eventModel.js";
+import { logAdminAction } from "../utils/adminLogger.js";
 
 const router = express.Router();
 
@@ -83,6 +84,39 @@ router.get("/", async (req, res) => {
   }
 });
 
+// 🟡 Review route — notify association head and delete event
+router.post("/:id/review", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    const event = await Event.findById(id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    // 🟩 Compose review email
+    const subject = `Event "${event.name}" — Review Requested`;
+    const message = `
+      <p>Dear ${event.associationHead},</p>
+      <p>Your event <strong>${event.name}</strong> has been placed under <span style="color:orange;"><strong>Review</strong></span> by the Admin.</p>
+      <p><strong>Reason:</strong> ${reason}</p>
+      <p>Please contact the Admin or resubmit your event with the necessary corrections.</p>
+      <br>
+      <p>— NITC Events Management System</p>
+    `;
+
+    // Send the email
+    await sendEmail(event.email, subject, message);
+
+    // Delete the event afterward
+    await Event.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Review email sent and event deleted." });
+  } catch (error) {
+    console.error("Error reviewing event:", error.message);
+    res.status(500).json({ message: "Failed to review event" });
+  }
+});
+
 // DELETE /events/:id — remove an event completely
 router.delete("/:id", async (req, res) => {
   try {
@@ -99,32 +133,33 @@ router.delete("/:id", async (req, res) => {
     const subject = `Event "${event.name}" — Deleted from Portal`;
     const message = `
       <p>Dear ${event.associationHead},</p>
-      <p>Your event <strong>${event.name}</strong> has been permanently deleted from the NITC Events portal by the Admin.</p>
+      <p>Your event <strong>${
+        event.name
+      }</strong> has been permanently deleted from the NITC Events portal by the Admin.</p>
       <p>Status before deletion: ${event.status || "Unknown"}</p>
       <br>
       <p>— NITC Events Management System</p>
     `;
 
     await sendEmail(event.email, subject, message);
-
-    res.status(200).json({ message: "Event deleted and email notification sent." });
+    // 🧾 Log deletion
+    logAdminAction("Deleted event", event.name);
+    
+    res
+      .status(200)
+      .json({ message: "Event deleted and email notification sent." });
   } catch (error) {
     console.error("Error deleting event:", error.message);
     res.status(500).json({ message: "Failed to delete event" });
   }
 });
 
-
 router.patch("/:id/status", async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
-    const event = await Event.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
+    const event = await Event.findByIdAndUpdate(id, { status }, { new: true });
 
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
@@ -137,8 +172,12 @@ router.patch("/:id/status", async (req, res) => {
     if (status === "Approved") {
       message = `
         <p>Dear ${event.associationHead},</p>
-        <p>Your event <strong>${event.name}</strong> has been <span style="color:green;"><strong>Approved</strong></span> by the Admin.</p>
-        <p>Event Date: ${new Date(event.startDate).toDateString()} at ${event.startTime}</p>
+        <p>Your event <strong>${
+          event.name
+        }</strong> has been <span style="color:green;"><strong>Approved</strong></span> by the Admin.</p>
+        <p>Event Date: ${new Date(event.startDate).toDateString()} at ${
+        event.startTime
+      }</p>
         <p>Venue: ${event.venue}</p>
         <p>Congratulations! 🎉</p>
         <br>
@@ -164,6 +203,8 @@ router.patch("/:id/status", async (req, res) => {
 
     // 🟢 Send the email
     await sendEmail(event.email, subject, message);
+    // 🧾 Log admin action
+    logAdminAction(`Updated event status to "${status}"`, event.name);
 
     res.status(200).json(event);
   } catch (err) {
@@ -171,7 +212,5 @@ router.patch("/:id/status", async (req, res) => {
     res.status(500).json({ message: "Failed to update event status" });
   }
 });
-
-
 
 export default router;
