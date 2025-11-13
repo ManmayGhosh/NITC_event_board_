@@ -37,9 +37,7 @@ export default function AdminEventReview() {
           });
 
           setEvents((prev) =>
-            prev.map((e) =>
-              e._id === id ? { ...e, status: "Denied" } : e
-            )
+            prev.map((e) => (e._id === id ? { ...e, status: "Denied" } : e))
           );
           setPendingDelete(id);
 
@@ -67,23 +65,42 @@ export default function AdminEventReview() {
         return;
       }
 
-      // 🟩 For other actions (Approve / Review)
-      await axios.patch(`http://localhost:5000/events/${id}/status`, {
-        status: action,
-      });
+      // 🟣 Handle REVIEW (prompt reason)
+      if (action === "Review Requested") {
+        const reason = window.prompt(
+          "🟡 Enter a short explanation for why this event requires review:"
+        );
 
-      setEvents((prev) =>
-        prev.map((event) =>
-          event._id === id ? { ...event, status: action } : event
-        )
-      );
+        if (!reason || reason.trim() === "") {
+          alert("⚠️ You must enter a reason for review.");
+          return;
+        }
 
-      setSelectedEvent(null);
-      setPendingDelete(null);
-      console.log(`✅ Event ${id} updated to ${action}`);
+        await axios.post(`http://localhost:5000/events/${id}/review`, {
+          reason,
+        });
+
+        // Remove from list after deletion
+        setEvents((prev) => prev.filter((event) => event._id !== id));
+        alert("📩 Review email sent and event removed from the list.");
+        return;
+      }
+
+      if (action === "Approved") {
+        await axios.patch(`http://localhost:5000/events/${id}/status`, {
+          status: "Approved",
+        });
+
+        setEvents((prev) =>
+          prev.map((event) =>
+            event._id === id ? { ...event, status: "Approved" } : event
+          )
+        );
+        alert("✅ Event approved successfully.");
+      }
     } catch (err) {
       console.error("❌ Action failed:", err);
-      alert("Action failed. Check console for details.");
+      alert("Action failed. Check backend logs.");
     }
   };
 
@@ -144,10 +161,7 @@ export default function AdminEventReview() {
                 <td className="py-3 px-4">{event.venue}</td>
                 <td className="py-3 px-4">{event.associationHead}</td>
                 <td className="py-3 px-4">{event.associationName}</td>
-                <td
-                  className="py-3 px-4 text-center space-x-2"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <td className="py-3 px-4 text-center space-x-2">
                   <button
                     onClick={() => handleAction(event._id, "Approved")}
                     className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
@@ -173,17 +187,7 @@ export default function AdminEventReview() {
                     Review
                   </button>
                 </td>
-                <td
-                  className={`py-3 px-4 text-center font-medium ${
-                    event.status === "Approved"
-                      ? "text-green-600"
-                      : event.status === "Denied"
-                      ? "text-red-600"
-                      : event.status === "Review Requested"
-                      ? "text-yellow-600"
-                      : "text-gray-600"
-                  }`}
-                >
+                <td className="py-3 px-4 text-center font-medium text-gray-700">
                   {event.status || "Pending"}
                 </td>
               </tr>
@@ -207,16 +211,28 @@ export default function AdminEventReview() {
                 alt={selectedEvent.name}
                 className="w-full h-48 object-cover rounded mb-4"
               />
-              <p><strong>Date:</strong> {formatDate(selectedEvent.date)}</p>
+              <p>
+                <strong>Date:</strong> {formatDate(selectedEvent.date)}
+              </p>
               <p>
                 <strong>Time:</strong> {selectedEvent.startTime} -{" "}
                 {selectedEvent.endTime}
               </p>
-              <p><strong>Venue:</strong> {selectedEvent.venue}</p>
-              <p><strong>Association:</strong> {selectedEvent.associationName}</p>
-              <p><strong>Head:</strong> {selectedEvent.associationHead}</p>
-              <p><strong>Description:</strong> {selectedEvent.description}</p>
-              <p><strong>Status:</strong> {selectedEvent.status || "Pending"}</p>
+              <p>
+                <strong>Venue:</strong> {selectedEvent.venue}
+              </p>
+              <p>
+                <strong>Association:</strong> {selectedEvent.associationName}
+              </p>
+              <p>
+                <strong>Head:</strong> {selectedEvent.associationHead}
+              </p>
+              <p>
+                <strong>Description:</strong> {selectedEvent.description}
+              </p>
+              <p>
+                <strong>Status:</strong> {selectedEvent.status || "Pending"}
+              </p>
 
               <div className="flex justify-end space-x-3 pt-4">
                 <button

@@ -1,5 +1,6 @@
 import express from "express";
 import { AdminHandlingAssociationHead } from "../MongoModels/adminHandlingAssociationHeads.js";
+import { logAdminAction } from "../utils/adminLogger.js";
 
 const router = express.Router();
 
@@ -9,11 +10,21 @@ const router = express.Router();
  */
 router.post("/", async (req, res) => {
   try {
-    const { id, name, email, collegeId, associationName, contactNumber } = req.body;
+    const { id, name, email, collegeId, associationName, contactNumber } =
+      req.body;
 
     // Validate required fields
-    if (!id || !name || !email || !collegeId || !associationName || !contactNumber) {
-      return res.status(400).json({ message: "Please provide all required fields." });
+    if (
+      !id ||
+      !name ||
+      !email ||
+      !collegeId ||
+      !associationName ||
+      !contactNumber
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Please provide all required fields." });
     }
 
     // Check for existing ID or email
@@ -21,7 +32,9 @@ router.post("/", async (req, res) => {
       $or: [{ id }, { email }],
     });
     if (existing) {
-      return res.status(409).json({ message: "Head with given ID or email already exists." });
+      return res
+        .status(409)
+        .json({ message: "Head with given ID or email already exists." });
     }
 
     const newHead = new AdminHandlingAssociationHead({
@@ -35,9 +48,12 @@ router.post("/", async (req, res) => {
 
     const savedHead = await newHead.save();
     res.status(201).json(savedHead);
+    logAdminAction("Added association head", newHead.name);
   } catch (error) {
     console.error("Error adding association head:", error.message);
-    res.status(500).json({ error: "Server error while adding association head." });
+    res
+      .status(500)
+      .json({ error: "Server error while adding association head." });
   }
 });
 
@@ -47,11 +63,15 @@ router.post("/", async (req, res) => {
  */
 router.get("/", async (req, res) => {
   try {
-    const heads = await AdminHandlingAssociationHead.find().sort({ createdAt: -1 });
+    const heads = await AdminHandlingAssociationHead.find().sort({
+      createdAt: -1,
+    });
     res.status(200).json(heads);
   } catch (error) {
     console.error("Error fetching heads:", error.message);
-    res.status(500).json({ error: "Server error while fetching association heads." });
+    res
+      .status(500)
+      .json({ error: "Server error while fetching association heads." });
   }
 });
 
@@ -74,9 +94,12 @@ router.patch("/:id", async (req, res) => {
     }
 
     res.status(200).json(updatedHead);
+    logAdminAction("Edited association head", updatedHead.name);
   } catch (error) {
     console.error("Error updating head:", error.message);
-    res.status(500).json({ error: "Server error while updating association head." });
+    res
+      .status(500)
+      .json({ error: "Server error while updating association head." });
   }
 });
 
@@ -87,16 +110,21 @@ router.patch("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await AdminHandlingAssociationHead.findOneAndDelete({ id: id });
+    const deleted = await AdminHandlingAssociationHead.findOneAndDelete({
+      id: id,
+    });
 
     if (!deleted) {
       return res.status(404).json({ message: "Association Head not found." });
     }
 
     res.status(200).json({ message: "Association Head deleted successfully." });
+    logAdminAction("Deleted association head", deleted?.name || "Unknown");
   } catch (error) {
     console.error("Error deleting head:", error.message);
-    res.status(500).json({ error: "Server error while deleting association head." });
+    res
+      .status(500)
+      .json({ error: "Server error while deleting association head." });
   }
 });
 
@@ -111,7 +139,9 @@ router.get("/check", async (req, res) => {
     const { email } = req.query;
 
     if (!email) {
-      return res.status(400).json({ message: "Email query parameter is required." });
+      return res
+        .status(400)
+        .json({ message: "Email query parameter is required." });
     }
 
     // Case-insensitive email match
@@ -131,9 +161,10 @@ router.get("/check", async (req, res) => {
     }
   } catch (error) {
     console.error("Error checking association head:", error.message);
-    res.status(500).json({ error: "Server error while checking association head." });
+    res
+      .status(500)
+      .json({ error: "Server error while checking association head." });
   }
 });
-
 
 export default router;
