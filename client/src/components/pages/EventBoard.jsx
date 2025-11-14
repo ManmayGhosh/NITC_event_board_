@@ -9,37 +9,23 @@ export default function EventBoard() {
   const [sortBy, setSortBy] = useState("name_asc");
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  console.log("🟢 useEffect triggered: fetching events..."); //Testing if connection works
-
   useEffect(() => {
     let mounted = true;
     axios
-      .get("http://localhost:5000/events")
+      .get("http://localhost:5000/api/events")
       .then((res) => {
-        console.log("📦 Event data from backend:", res.data);
-        const payload = Array.isArray(res.data) ? res.data : res.data.data;
-        setEvents(payload || []);
+        if (!mounted) return;
+        setEvents(res.data || []);
       })
       .catch((err) => {
-        console.error("❌ Failed to fetch events:", err);
-        if (err.response)
-          console.log("Server responded with:", err.response.data);
-        if (err.request) console.log("No response received:", err.request);
+        console.error("Failed to fetch events:", err);
+        if (mounted) setEvents([]);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
     return () => (mounted = false);
   }, []);
-
-  // 🔹 Helper to format backend ISO date (e.g. 2025-11-12T00:00:00.000Z) to readable form
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
 
   if (loading) {
     return (
@@ -104,18 +90,13 @@ export default function EventBoard() {
             onClick={() => setSelectedEvent(event)}
           >
             <img
-              src={
-                event.banner ||
-                `https://picsum.photos/seed/${event._id}/800/400`
-              }
+              src={event.banner || `https://picsum.photos/seed/${event._id}/800/400`}
               alt={event.name}
               className="w-full h-40 object-cover rounded"
             />
-            <h3 className="text-lg font-semibold text-pink-700 mt-3">
-              {event.name}
-            </h3>
+            <h3 className="text-lg font-semibold text-pink-700 mt-3">{event.name}</h3>
             <p className="text-sm text-gray-600 mt-1">
-              📅 {formatDate(event.date)} • {event.time} <br /> 📍 {event.venue}
+              📅 {event.date} • {event.time} <br /> 📍 {event.venue}
             </p>
             <p className="text-sm mt-2">Head: {event.associationHead}</p>
           </article>
@@ -124,81 +105,39 @@ export default function EventBoard() {
 
       {/* Popup Modal */}
       <ModalView
-      show={!!selectedEvent}
-      onClose={() => setSelectedEvent(null)}
-      title={selectedEvent?.name}
-    >
-      {selectedEvent && (
-        <div className="space-y-3">
-          {/* Banner */}
-          <img
-            src={
-              selectedEvent.banner ||
-              `https://picsum.photos/seed/${selectedEvent._id}/800/400`
-            }
-            alt={selectedEvent.name}
-            className="rounded w-full h-48 object-cover mb-4"
-          />
-
-          {/* Date */}
-          <p>
-            <strong>Date:</strong> {formatDate(selectedEvent.date)}
-          </p>
-
-          {/* Time Range */}
-          <p>
-            <strong>Time:</strong> {selectedEvent.startTime} – {selectedEvent.endTime}
-          </p>
-
-          {/* Venue */}
-          <p>
-            <strong>Venue:</strong> {selectedEvent.venue}
-          </p>
-
-          {/* Head */}
-          <p>
-            <strong>Association Head:</strong> {selectedEvent.associationHead}
-          </p>
-
-          {/* Description */}
-          <p>
-            <strong>Description:</strong>{" "}
-            {selectedEvent.description || "No description provided."}
-          </p>
-
-          {/* Status */}
-          <p>
-            <strong>Status:</strong>{" "}
-            <span
-              className={`px-2 py-1 rounded text-white text-sm ${
-                selectedEvent.status === "Approved"
-                  ? "bg-green-600"
-                  : selectedEvent.status === "Denied"
-                  ? "bg-red-600"
-                  : selectedEvent.status === "Review Requested"
-                  ? "bg-yellow-500 text-black"
-                  : "bg-gray-500"
-              }`}
-            >
-              {selectedEvent.status || "Pending"}
-            </span>
-          </p>
-
-          {/* Registration Link */}
-          <p>
-            <strong>Registration Link:</strong>{" "}
-            <a
-              href={selectedEvent.registrationLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline break-all"
-            >
-              {selectedEvent.registrationLink || "No registration link provided"}
-            </a>
-          </p>
-        </div>
-      )}
-    </ModalView>
+        show={!!selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        title={selectedEvent?.name}
+      >
+        {selectedEvent && (
+          <div className="space-y-2">
+            <img
+              src={selectedEvent.banner || `https://picsum.photos/seed/${selectedEvent._id}/800/400`}
+              alt={selectedEvent.name}
+              className="rounded w-full h-48 object-cover mb-4"
+            />
+            <p><strong>Start Date:</strong> {selectedEvent.startDate}</p>
+            <p><strong>Start Time:</strong> {selectedEvent.startTime}</p>
+            <p><strong>End Date:</strong> {selectedEvent. endDate}</p>
+            <p><strong>End Time:</strong> {selectedEvent. endTime}</p>
+            <p><strong>Venue:</strong> {selectedEvent.venue}</p>
+            <p><strong>Association:</strong> {selectedEvent.associationName}</p>
+            <p><strong>Head:</strong> {selectedEvent.associationHead}</p>
+            <p><strong>Description:</strong> {selectedEvent.description || "No details provided."}</p>
+            <p>
+                <strong>Registration Link:</strong>{" "}
+                <a
+                  href={selectedEvent.registrationLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  {selectedEvent.registrationLink}
+                </a>
+            </p>
+          </div>
+        )}
+      </ModalView>
     </div>
   );
 }

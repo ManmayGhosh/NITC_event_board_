@@ -8,136 +8,57 @@ const EventForm = () => {
     associationHead: "",
     email: "",
     startDate: "",
-    endDate: "",
     startTime: "",
+    endDate: "",
     endTime: "",
     venue: "",
     description: "",
-    banner: "",
+    poster: null,
     registrationLink: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [missingFields, setMissingFields] = useState([]);
-
-  // 🟩 Load user info if association head
-  useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      const user = JSON.parse(userData);
-      if (user.role === "association_head") {
-        setFormData((prev) => ({
-          ...prev,
-          associationHead: user.name || "",
-          email: user.email || "",
-        }));
-      }
-    }
-  }, []);
-
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, files } = e.target;
+
+    if (name === "poster") {
+      const file = files[0];
+      if (!file) return;
+
+      const validTypes = ["image/png", "image/jpeg"];
+      if (!validTypes.includes(file.type)) {
+        alert("Only PNG and JPG files are allowed!");
+        e.target.value = "";
+        return;
+      }
+      setFormData((prev) => ({ ...prev, poster: file }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
-  // 🧠 Validate required fields
-  const validateFields = () => {
-    const requiredFields = {
-      eventName: "Event Name",
-      associationName: "Association Name",
-      associationHead: "Association Head",
-      email: "Email (NITC)",
-      startDate: "Start Date",
-      endDate: "End Date",
-      startTime: "Start Time",
-      endTime: "End Time",
-      venue: "Venue",
-      banner: "Banner URL",
-    };
-
-    const missing = Object.keys(requiredFields).filter(
-      (field) => !formData[field] || formData[field].trim() === ""
-    );
-
-    setMissingFields(missing.map((f) => requiredFields[f]));
-    return missing;
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const missing = validateFields();
 
-    if (missing.length > 0) {
-      alert(
-        "⚠️ Please fill the following required fields:\n\n- " +
-          missing.join("\n- ")
-      );
+    const { eventName, associationName, associationHead, email, startDate, startTime, endDate, 
+    endTime , venue } = formData;
+
+    // ✅ Mandatory fields validation
+    if (!eventName || !associationName || !associationHead || !email || !startDate ||
+    !startTime || !endDate || !endTime || !venue) {
+      alert("⚠️ Please fill all mandatory fields (Event Name, Association Name, Association Head, Email, Date, Time, Venue).");
       return;
     }
 
-    if (!formData.email.endsWith("@nitc.ac.in")) {
-      alert("⚠️ Please use a valid @nitc.ac.in email address.");
+    // ✅ Validate email format + domain
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email) || !email.endsWith("@nitc.ac.in")) {
+      alert("⚠️ Please enter a valid @nitc.ac.in email address.");
       return;
     }
 
-    const urlRegex = /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|svg)$/i;
-    if (!urlRegex.test(formData.banner)) {
-      alert("⚠️ Please provide a valid image URL ending with .jpg, .png, etc.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const data = {
-        name: formData.eventName,
-        associationName: formData.associationName,
-        associationHead: formData.associationHead,
-        email: formData.email,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        startTime: formData.startTime,
-        endTime: formData.endTime,
-        venue: formData.venue,
-        description: formData.description || "",
-        banner: formData.banner,
-        registrationLink: formData.registrationLink || "",
-      };
-
-      const res = await axios.post("http://localhost:5000/events", data);
-      alert("🎉 Event submitted successfully!");
-      console.log("✅ Event saved:", res.data);
-
-      setFormData({
-        eventName: "",
-        associationName: "",
-        associationHead: res.data.associationHead || "",
-        email: res.data.email || "",
-        startDate: "",
-        endDate: "",
-        startTime: "",
-        endTime: "",
-        venue: "",
-        description: "",
-        banner: "",
-        registrationLink: "",
-      });
-      setMissingFields([]);
-    } catch (err) {
-      console.error("❌ Failed to submit event:", err);
-      alert("Failed to submit event. Check console for details.");
-    } finally {
-      setLoading(false);
-    }
+    console.log("✅ Submitted Event:", formData);
+    alert("Event submitted successfully! (Check console for details)");
   };
-
-  // 🎨 Field styling
-  const inputClass = (field) =>
-    `w-full p-2 border rounded-lg focus:ring-2 ${
-      missingFields.includes(field)
-        ? "border-red-500 focus:ring-red-500"
-        : "border-gray-300 focus:ring-indigo-500"
-    }`;
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50 p-6">
@@ -159,8 +80,13 @@ const EventForm = () => {
             name="eventName"
             value={formData.eventName}
             onChange={handleChange}
-            className={inputClass("Event Name")}
+            maxLength="50"
+            required
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
           />
+          <p className="text-sm text-gray-500 text-right">
+            {formData.eventName.length}/50
+          </p>
         </div>
 
         {/* Association Name */}
@@ -173,97 +99,114 @@ const EventForm = () => {
             name="associationName"
             value={formData.associationName}
             onChange={handleChange}
-            className={inputClass("Association Name")}
+            maxLength="50"
+            required
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
           />
+          <p className="text-sm text-gray-500 text-right">
+            {formData.associationName.length}/50
+          </p>
         </div>
 
         {/* Association Head */}
         <div className="mb-4">
           <label className="block text-gray-700 font-medium mb-1">
-            Association Head
+            Association Head <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             name="associationHead"
             value={formData.associationHead}
-            readOnly
-            className={inputClass("Association Head") + " bg-gray-100"}
+            onChange={handleChange}
+            maxLength="50"
+            required
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
           />
+          <p className="text-sm text-gray-500 text-right">
+            {formData.associationHead.length}/50
+          </p>
         </div>
 
         {/* Email */}
         <div className="mb-4">
           <label className="block text-gray-700 font-medium mb-1">
-            Email (NITC)
+            Email (NITC) <span className="text-red-500">*</span>
           </label>
           <input
             type="email"
             name="email"
             value={formData.email}
-            readOnly
-            className={inputClass("Email (NITC)") + " bg-gray-100"}
+            onChange={handleChange}
+            placeholder="example@nitc.ac.in"
+            required
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
-        {/* Dates */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div>
+        {/* Date & Time */}
+        <div className="flex gap-3 mb-4">
+          <div className="flex-1">
             <label className="block text-gray-700 font-medium mb-1">
               Start Date <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
-              name="startDate"
-              value={formData.startDate}
+              name="date"
+              value={formData.date}
               onChange={handleChange}
-              className={inputClass("Start Date")}
+              required
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              End Date <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              name="endDate"
-              value={formData.endDate}
-              onChange={handleChange}
-              className={inputClass("End Date")}
-            />
-          </div>
-        </div>
-
-        {/* Times */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div>
+          <div className="flex-1">
             <label className="block text-gray-700 font-medium mb-1">
               Start Time <span className="text-red-500">*</span>
             </label>
             <input
               type="time"
-              name="startTime"
-              value={formData.startTime}
+              name="time"
+              value={formData.time}
               onChange={handleChange}
-              className={inputClass("Start Time")}
+              required
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+        </div>
+
+{/* ✅ Added: End Date & Time Section */}
+        {/* Date & Time */}
+        <div className="flex gap-3 mb-4">
+          <div className="flex-1">
+            <label className="block text-gray-700 font-medium mb-1">
+              End Date <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
-          <div>
+          <div className="flex-1">
             <label className="block text-gray-700 font-medium mb-1">
               End Time <span className="text-red-500">*</span>
             </label>
             <input
               type="time"
-              name="endTime"
-              value={formData.endTime}
+              name="time"
+              value={formData.time}
               onChange={handleChange}
-              className={inputClass("End Time")}
+              required
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         </div>
 
-        {/* ✅ Venue */}
+        {/* Venue */}
         <div className="mb-4">
           <label className="block text-gray-700 font-medium mb-1">
             Venue <span className="text-red-500">*</span>
@@ -273,31 +216,13 @@ const EventForm = () => {
             name="venue"
             value={formData.venue}
             onChange={handleChange}
-            placeholder="Enter event venue"
-            className={inputClass("Venue")}
+            maxLength="50"
+            required
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
           />
-        </div>
-
-        {/* Banner URL */}
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-1">
-            Banner Image URL <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="url"
-            name="banner"
-            value={formData.banner}
-            onChange={handleChange}
-            placeholder="https://example.com/image.jpg"
-            className={inputClass("Banner URL")}
-          />
-          {formData.banner && (
-            <img
-              src={formData.banner}
-              alt="Event Banner Preview"
-              className="w-full h-48 object-cover rounded-lg mt-3 border"
-            />
-          )}
+          <p className="text-sm text-gray-500 text-right">
+            {formData.venue.length}/50
+          </p>
         </div>
 
         {/* Description */}
@@ -309,8 +234,26 @@ const EventForm = () => {
             name="description"
             value={formData.description}
             onChange={handleChange}
+            maxLength="250"
             rows="3"
             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+          />
+          <p className="text-sm text-gray-500 text-right">
+            {formData.description.length}/250
+          </p>
+        </div>
+
+        {/* Poster Upload */}
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-1">
+            Poster (PNG/JPG)
+          </label>
+          <input
+            type="file"
+            name="poster"
+            accept="image/png, image/jpeg"
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-lg"
           />
         </div>
 
@@ -329,29 +272,11 @@ const EventForm = () => {
           />
         </div>
 
-        {/* Missing Field Display */}
-        {missingFields.length > 0 && (
-          <div className="mb-4 bg-red-50 border border-red-300 rounded-lg p-3 text-sm text-red-600">
-            <strong>Missing Required Fields:</strong>
-            <ul className="list-disc ml-5 mt-1">
-              {missingFields.map((field) => (
-                <li key={field}>{field}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Submit */}
         <button
           type="submit"
-          disabled={loading}
-          className={`w-full py-2 rounded-lg font-semibold transition ${
-            loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-indigo-600 hover:bg-indigo-700 text-white"
-          }`}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold transition"
         >
-          {loading ? "Submitting..." : "Submit Event"}
+          Submit Event
         </button>
       </form>
     </div>

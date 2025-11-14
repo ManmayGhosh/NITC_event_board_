@@ -1,7 +1,7 @@
 // import EventBoard from './components/EventBoard.jsx';
 // import LandingPage from './components/pages/LandingPage.jsx';
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import {Routes , Route} from "react-router-dom";
 import LandingPage from "./components/pages/LandingPage.jsx";
 import Dashboard from "./components/layout/DashBoard.jsx";
 import EventBoard from "./components/pages/EventBoard.jsx";
@@ -16,27 +16,15 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
 
       {/* Guest View (no sidebar) */}
-      <Route path="/guest/events" element={<Dashboard />} />
+      <Route path="/guest/events" element={<Dashboard activePage="EventBoard" />} />
 
       {/* User Routes */}
-      <Route
-        path="/user/events"
-        element={<Dashboard activePage="EventBoard" />}
-      />
-      <Route
-        path="/user/submit_event"
-        element={<Dashboard activePage="EventForm" />}
-      />
+      <Route path="/user/events" element={<Dashboard activePage="EventBoard" />} />
+      <Route path="/user/submit_event" element={<Dashboard activePage="EventForm" />} />
 
       {/* Admin Routes */}
-      <Route
-        path="/admin/admin_event_review"
-        element={<Dashboard activePage="adminEventReview" />}
-      />
-      <Route
-        path="/admin/admin_handle_association"
-        element={<Dashboard activePage="adminAssociationManager" />}
-      />
+      <Route path="/admin/admin_event_review" element={<Dashboard activePage="adminEventReview" />} />
+      <Route path="/admin/admin_handle_association" element={<Dashboard activePage="adminAssociationManager" />} />
     </Routes>
   );
 }

@@ -1,34 +1,30 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 
 export default function AdminAssociationManager() {
-  const [heads, setHeads] = useState([]);
+  const [heads, setHeads] = useState([
+    {
+      id: 1,
+      name: "Dr. Rao",
+      email: "rao@nitc.ac.in",
+      collegeId: "NITC001",
+      associationName: "Tech Society",
+      timelineStart: "2024-06-01",
+      timelineEnd: "2025-05-31",
+      contact: "9876543210",
+    },
+  ]);
+
   const [formData, setFormData] = useState({
-    id: "",
     name: "",
     email: "",
     collegeId: "",
     associationName: "",
-    contactNumber: "",
+    timelineStart: "",
+    timelineEnd: "",
+    contact: "",
   });
+
   const [editId, setEditId] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // ✅ Fetch data on mount
-  useEffect(() => {
-    fetchHeads();
-  }, []);
-
-  const fetchHeads = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/heads");
-      setHeads(res.data);
-      setLoading(false);
-    } catch (err) {
-      console.error("❌ Failed to fetch association heads:", err);
-      setLoading(false);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,91 +32,77 @@ export default function AdminAssociationManager() {
   };
 
   const validateForm = () => {
-    const { id, name, email, collegeId, associationName, contactNumber } =
-      formData;
+    const { name, email, collegeId, associationName, timelineStart, timelineEnd, contact } = formData;
 
-    if (!id || !name || !email || !collegeId || !associationName || !contactNumber) {
+    if (!name || !email || !collegeId || !associationName || !timelineStart || !timelineEnd || !contact) {
       alert("⚠️ All fields are mandatory!");
       return false;
     }
 
-    if (!email.endsWith("@nitc.ac.in")) {
-      alert("⚠️ Email must end with @nitc.ac.in");
+    if (name.length > 50 || associationName.length > 50) {
+      alert("⚠️ Name and Association Name must be under 50 characters.");
       return false;
     }
 
-    if (!/^[0-9]{10}$/.test(contactNumber)) {
-      alert("⚠️ Contact number must be 10 digits.");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email) || !email.endsWith("@nitc.ac.in")) {
+      alert("⚠️ Please enter a valid @nitc.ac.in email address.");
+      return false;
+    }
+
+    if (!/^[A-Za-z0-9]{1,10}$/.test(collegeId)) {
+      alert("⚠️ College ID must be alphanumeric and up to 10 characters.");
+      return false;
+    }
+
+    if (!/^\d{10}$/.test(contact)) {
+      alert("⚠️ Contact must be a valid 10-digit number.");
+      return false;
+    }
+
+    if (new Date(timelineStart) > new Date(timelineEnd)) {
+      alert("⚠️ Start date cannot be after end date.");
       return false;
     }
 
     return true;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    try {
-      if (editId) {
-        // ✅ Update existing record
-        await axios.patch(`http://localhost:5000/heads/${editId}`, formData);
-        alert("✅ Association head updated successfully!");
-      } else {
-        // ✅ Add new record
-        await axios.post("http://localhost:5000/heads", formData);
-        alert("✅ Association head added successfully!");
-      }
-      setFormData({
-        id: "",
-        name: "",
-        email: "",
-        collegeId: "",
-        associationName: "",
-        contactNumber: "",
-      });
+    if (editId) {
+      setHeads((prev) =>
+        prev.map((h) => (h.id === editId ? { ...formData, id: editId } : h))
+      );
       setEditId(null);
-      fetchHeads(); // refresh list
-    } catch (err) {
-      console.error("❌ Error saving association head:", err);
-      alert("Failed to save association head. Check console for details.");
+    } else {
+      setHeads((prev) => [...prev, { ...formData, id: Date.now() }]);
     }
+
+    setFormData({
+      name: "",
+      email: "",
+      collegeId: "",
+      associationName: "",
+      timelineStart: "",
+      timelineEnd: "",
+      contact: "",
+    });
   };
 
   const handleEdit = (id) => {
-    const head = heads.find((h) => h.id === Number(id));
-    if (!head) return;
-    setFormData({
-      id: head.id,
-      name: head.name,
-      email: head.email,
-      collegeId: head.collegeId,
-      associationName: head.associationName,
-      contactNumber: head.contactNumber,
-    });
+    const head = heads.find((h) => h.id === id);
+    setFormData(head);
     setEditId(id);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this record?")) return;
-
-    try {
-      await axios.delete(`http://localhost:5000/heads/${id}`);
-      alert("🗑️ Association head deleted successfully!");
-      fetchHeads();
-    } catch (err) {
-      console.error("❌ Failed to delete head:", err);
-      alert("Error deleting head. Check console for details.");
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this record?")) {
+      setHeads((prev) => prev.filter((h) => h.id !== id));
     }
   };
-
-  if (loading) {
-    return (
-      <div className="p-6 text-center text-gray-600">
-        <p>Loading association heads...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -128,7 +110,7 @@ export default function AdminAssociationManager() {
         Admin — Manage Association Heads
       </h1>
 
-      {/* Form */}
+      {/* Add / Edit Form */}
       <form
         onSubmit={handleSubmit}
         className="bg-white shadow-lg rounded-xl p-6 mb-8 max-w-3xl mx-auto"
@@ -140,28 +122,13 @@ export default function AdminAssociationManager() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block font-medium mb-1 text-gray-700">
-              ID <span className="text-red-500">*</span>
-            </label>
-            <input
-              name="id"
-              value={formData.id}
-              onChange={handleChange}
-              placeholder="Numeric ID"
-              type="number"
-              className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-indigo-500"
-              required
-              disabled={!!editId}
-            />
-          </div>
-
-          <div>
-            <label className="block font-medium mb-1 text-gray-700">
               Name <span className="text-red-500">*</span>
             </label>
             <input
               name="name"
               value={formData.name}
               onChange={handleChange}
+              maxLength="50"
               className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-indigo-500"
               required
             />
@@ -190,7 +157,8 @@ export default function AdminAssociationManager() {
               name="collegeId"
               value={formData.collegeId}
               onChange={handleChange}
-              placeholder="e.g. NITC001"
+              maxLength="10"
+              placeholder="e.g. NITC123"
               className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-indigo-500"
               required
             />
@@ -204,6 +172,35 @@ export default function AdminAssociationManager() {
               name="associationName"
               value={formData.associationName}
               onChange={handleChange}
+              maxLength="50"
+              className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1 text-gray-700">
+              Timeline (From) <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              name="timelineStart"
+              value={formData.timelineStart}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1 text-gray-700">
+              Timeline (To) <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              name="timelineEnd"
+              value={formData.timelineEnd}
+              onChange={handleChange}
               className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-indigo-500"
               required
             />
@@ -211,11 +208,11 @@ export default function AdminAssociationManager() {
 
           <div className="md:col-span-2">
             <label className="block font-medium mb-1 text-gray-700">
-              Contact Number <span className="text-red-500">*</span>
+              Contact Info <span className="text-red-500">*</span>
             </label>
             <input
-              name="contactNumber"
-              value={formData.contactNumber}
+              name="contact"
+              value={formData.contact}
               onChange={handleChange}
               placeholder="10-digit number"
               className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-indigo-500"
@@ -232,25 +229,22 @@ export default function AdminAssociationManager() {
         </button>
       </form>
 
-      {/* Table */}
+      {/* Existing Association Heads */}
       <div className="bg-white shadow-lg rounded-xl p-6 max-w-5xl mx-auto">
         <h2 className="text-xl font-semibold mb-4 text-gray-800">
           Current Association Heads
         </h2>
-
         {heads.length === 0 ? (
-          <p className="text-gray-500 text-center">
-            No association heads found in the database.
-          </p>
+          <p className="text-gray-500">No association heads added yet.</p>
         ) : (
           <table className="w-full border border-gray-200 rounded-lg">
             <thead className="bg-indigo-600 text-white">
               <tr>
-                <th className="py-2 px-3 text-left">ID</th>
                 <th className="py-2 px-3 text-left">Name</th>
                 <th className="py-2 px-3 text-left">Email</th>
                 <th className="py-2 px-3 text-left">College ID</th>
                 <th className="py-2 px-3 text-left">Association</th>
+                <th className="py-2 px-3 text-center">Timeline</th>
                 <th className="py-2 px-3 text-center">Contact</th>
                 <th className="py-2 px-3 text-center">Actions</th>
               </tr>
@@ -261,12 +255,14 @@ export default function AdminAssociationManager() {
                   key={h.id}
                   className="border-b hover:bg-gray-50 transition text-gray-700"
                 >
-                  <td className="py-2 px-3">{h.id}</td>
                   <td className="py-2 px-3">{h.name}</td>
                   <td className="py-2 px-3">{h.email}</td>
                   <td className="py-2 px-3">{h.collegeId}</td>
                   <td className="py-2 px-3">{h.associationName}</td>
-                  <td className="py-2 px-3 text-center">{h.contactNumber}</td>
+                  <td className="py-2 px-3 text-center">
+                    {h.timelineStart} → {h.timelineEnd}
+                  </td>
+                  <td className="py-2 px-3 text-center">{h.contact}</td>
                   <td className="py-2 px-3 text-center space-x-2">
                     <button
                       onClick={() => handleEdit(h.id)}
