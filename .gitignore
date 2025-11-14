@@ -25,6 +25,8 @@ pnpm-lock.yaml
 .env.production.local
 /server/.env
 /client/.env
+/server/logs/admin_actions.log
+/server/logs/admin_actions.log
 
 # macOS and Windows specific files
 .DS_Store
