@@ -17,10 +17,11 @@ export default function SignInModal({ mode, onClose, onAuthenticated }) {
 
       const user = res.data.user;
       const email = user.email?.toLowerCase();
+      const ADMIN_EMAIL = process.env.REACT_APP_ADMIN_EMAIL;
       let role = "guest"; // default fallback role
 
       // 🧠 Step 2: Check for admin
-      if (email === "admin@nitc.ac.in") {
+      if (email === ADMIN_EMAIL) {
         role = "admin";
       } else {
         // 🧠 Step 3: Check if user is association head from DB

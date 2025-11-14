@@ -162,31 +162,54 @@ export default function AdminEventReview() {
                 <td className="py-3 px-4">{event.associationHead}</td>
                 <td className="py-3 px-4">{event.associationName}</td>
                 <td className="py-3 px-4 text-center space-x-2">
-                  <button
-                    onClick={() => handleAction(event._id, "Approved")}
-                    className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                  >
-                    Allow
-                  </button>
 
-                  <button
-                    onClick={() => handleAction(event._id, "Denied")}
-                    className={`px-3 py-1 rounded text-white ${
-                      pendingDelete === event._id
-                        ? "bg-red-700 animate-pulse"
-                        : "bg-red-500 hover:bg-red-600"
-                    }`}
-                  >
-                    {pendingDelete === event._id ? "Confirm Delete" : "Deny"}
-                  </button>
+                {/* If event is approved → ONLY Deny/Delete should appear */}
+                {event.status === "Approved" ? (
+                  <>
+                    <button
+                      onClick={() => handleAction(event._id, "Denied")}
+                      className={`px-3 py-1 rounded text-white ${
+                        pendingDelete === event._id
+                          ? "bg-red-700 animate-pulse"
+                          : "bg-red-500 hover:bg-red-600"
+                      }`}
+                    >
+                      {pendingDelete === event._id ? "Confirm Delete" : "Deny"}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* ALLOW button */}
+                    <button
+                      onClick={() => handleAction(event._id, "Approved")}
+                      className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                    >
+                      Allow
+                    </button>
 
-                  <button
-                    onClick={() => handleAction(event._id, "Review Requested")}
-                    className="px-3 py-1 bg-yellow-400 text-black rounded hover:bg-yellow-500"
-                  >
-                    Review
-                  </button>
-                </td>
+                    {/* DENY (delete flow) */}
+                    <button
+                      onClick={() => handleAction(event._id, "Denied")}
+                      className={`px-3 py-1 rounded text-white ${
+                        pendingDelete === event._id
+                          ? "bg-red-700 animate-pulse"
+                          : "bg-red-500 hover:bg-red-600"
+                      }`}
+                    >
+                      {pendingDelete === event._id ? "Confirm Delete" : "Deny"}
+                    </button>
+
+                    {/* REVIEW */}
+                    <button
+                      onClick={() => handleAction(event._id, "Review Requested")}
+                      className="px-3 py-1 bg-yellow-400 text-black rounded hover:bg-yellow-500"
+                    >
+                      Review
+                    </button>
+                  </>
+                )}
+              </td>
+
                 <td className="py-3 px-4 text-center font-medium text-gray-700">
                   {event.status || "Pending"}
                 </td>
@@ -235,33 +258,55 @@ export default function AdminEventReview() {
               </p>
 
               <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  onClick={() => handleAction(selectedEvent._id, "Approved")}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  Allow
-                </button>
-                <button
-                  onClick={() => handleAction(selectedEvent._id, "Denied")}
-                  className={`px-4 py-2 rounded text-white ${
-                    pendingDelete === selectedEvent._id
-                      ? "bg-red-700 animate-pulse"
-                      : "bg-red-600 hover:bg-red-700"
-                  }`}
-                >
-                  {pendingDelete === selectedEvent._id
-                    ? "Confirm Delete"
-                    : "Deny"}
-                </button>
-                <button
-                  onClick={() =>
-                    handleAction(selectedEvent._id, "Review Requested")
-                  }
-                  className="px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500"
-                >
-                  Review
-                </button>
-              </div>
+              {selectedEvent.status === "Approved" ? (
+                <>
+                  {/* Only Deny/Delete when approved */}
+                  <button
+                    onClick={() => handleAction(selectedEvent._id, "Denied")}
+                    className={`px-4 py-2 rounded text-white ${
+                      pendingDelete === selectedEvent._id
+                        ? "bg-red-700 animate-pulse"
+                        : "bg-red-600 hover:bg-red-700"
+                    }`}
+                  >
+                    {pendingDelete === selectedEvent._id ? "Confirm Delete" : "Deny"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Allow */}
+                  <button
+                    onClick={() => handleAction(selectedEvent._id, "Approved")}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    Allow
+                  </button>
+
+                  {/* Deny */}
+                  <button
+                    onClick={() => handleAction(selectedEvent._id, "Denied")}
+                    className={`px-4 py-2 rounded text-white ${
+                      pendingDelete === selectedEvent._id
+                        ? "bg-red-700 animate-pulse"
+                        : "bg-red-600 hover:bg-red-700"
+                    }`}
+                  >
+                    {pendingDelete === selectedEvent._id ? "Confirm Delete" : "Deny"}
+                  </button>
+
+                  {/* Review */}
+                  <button
+                    onClick={() =>
+                      handleAction(selectedEvent._id, "Review Requested")
+                    }
+                    className="px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500"
+                  >
+                    Review
+                  </button>
+                </>
+              )}
+
+            </div>
             </div>
           )}
         </ModalView>

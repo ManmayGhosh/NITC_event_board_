@@ -124,46 +124,81 @@ export default function EventBoard() {
 
       {/* Popup Modal */}
       <ModalView
-        show={!!selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-        title={selectedEvent?.name}
-      >
-        {selectedEvent && (
-          <div className="space-y-2">
-            <img
-              src={
-                selectedEvent.banner ||
-                `https://picsum.photos/seed/${selectedEvent._id}/800/400`
-              }
-              alt={selectedEvent.name}
-              className="rounded w-full h-48 object-cover mb-4"
-            />
-            <p>
-              <strong>Date:</strong> {formatDate(selectedEvent.date)}
-            </p>
-            <p>
-              <strong>Time:</strong> {selectedEvent.time}
-            </p>
-            <p>
-              <strong>Venue:</strong> {selectedEvent.venue}
-            </p>
-            <p>
-              <strong>Head:</strong> {selectedEvent.associationHead}
-            </p>
-            <p>
-              <strong>Registration Link:</strong>{" "}
-              <a
-                href={selectedEvent.registrationLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                {selectedEvent.registrationLink}
-              </a>
-            </p>
-          </div>
-        )}
-      </ModalView>
+      show={!!selectedEvent}
+      onClose={() => setSelectedEvent(null)}
+      title={selectedEvent?.name}
+    >
+      {selectedEvent && (
+        <div className="space-y-3">
+          {/* Banner */}
+          <img
+            src={
+              selectedEvent.banner ||
+              `https://picsum.photos/seed/${selectedEvent._id}/800/400`
+            }
+            alt={selectedEvent.name}
+            className="rounded w-full h-48 object-cover mb-4"
+          />
+
+          {/* Date */}
+          <p>
+            <strong>Date:</strong> {formatDate(selectedEvent.date)}
+          </p>
+
+          {/* Time Range */}
+          <p>
+            <strong>Time:</strong> {selectedEvent.startTime} – {selectedEvent.endTime}
+          </p>
+
+          {/* Venue */}
+          <p>
+            <strong>Venue:</strong> {selectedEvent.venue}
+          </p>
+
+          {/* Head */}
+          <p>
+            <strong>Association Head:</strong> {selectedEvent.associationHead}
+          </p>
+
+          {/* Description */}
+          <p>
+            <strong>Description:</strong>{" "}
+            {selectedEvent.description || "No description provided."}
+          </p>
+
+          {/* Status */}
+          <p>
+            <strong>Status:</strong>{" "}
+            <span
+              className={`px-2 py-1 rounded text-white text-sm ${
+                selectedEvent.status === "Approved"
+                  ? "bg-green-600"
+                  : selectedEvent.status === "Denied"
+                  ? "bg-red-600"
+                  : selectedEvent.status === "Review Requested"
+                  ? "bg-yellow-500 text-black"
+                  : "bg-gray-500"
+              }`}
+            >
+              {selectedEvent.status || "Pending"}
+            </span>
+          </p>
+
+          {/* Registration Link */}
+          <p>
+            <strong>Registration Link:</strong>{" "}
+            <a
+              href={selectedEvent.registrationLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline break-all"
+            >
+              {selectedEvent.registrationLink || "No registration link provided"}
+            </a>
+          </p>
+        </div>
+      )}
+    </ModalView>
     </div>
   );
 }
