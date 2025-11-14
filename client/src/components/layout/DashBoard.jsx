@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../ui/Sidebar.jsx";
 import Topbar from "../ui/Topbar.jsx";
-import { useLocation } from "react-router-dom";
-// Your existing UIs
+import { useLocation, useNavigate } from "react-router-dom";
 import EventBoard from "../pages/EventBoard.jsx";
 import EventForm from "../pages/EventForm.jsx";
 import AdminEventReview from "../pages/AdminEventReview.jsx";
